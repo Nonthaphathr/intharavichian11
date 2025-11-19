@@ -3,8 +3,11 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.2 </title>
+  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.2 (Updated Logic)</title>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  
   <script src="/_sdk/element_sdk.js"></script>
+
   <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap');
 
@@ -423,9 +426,6 @@
             }
         }
    </style>
- <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
  <body>
   <div class="container">
@@ -438,7 +438,7 @@
    <div class="pattern-info">
     <h3 style="text-align: center; color: #2c3e50; margin-bottom: 15px;">ฉันทลักษณ์อินทรวิเชียรฉันท์ 11</h3>
     <div style="text-align: center; display: flex; flex-direction: column; gap: 15px; align-items: center;">
-        <a href="https://www.homelittlegirl.com/index.php?topic=14038.0" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.3s ease;">
+        <a href="https://www.homelittlegirl.com/index.php?topic=14045.0" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.3s ease;">
             <img src="https://img5.pic.in.th/file/secure-sv1/logo-vichakarngo-8.png" alt="Home Little Girl" style="max-width: 200px; max-height: 80px; width: auto; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         </a> 
         <a href="https://nonthaphathr.github.io/datalahu/" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.3s ease;">
@@ -764,6 +764,38 @@
  
             if (hasEndingConsonant(word)) {
                 return false; 
+            }
+
+            // ** เพิ่มตรรกะ: ตรวจสอบสระเสียงยาวที่บังคับเป็นครุ (แม้จะมีสระท้ายสั้น) **
+            const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
+            const shorteners = ["ะ", "็"]; // สระอะ และ ไม้ไต่คู้
+
+            let hasLongVowel = false;
+            for (let v of forceKruLongVowels) {
+                if (processedWord.includes(v)) {
+                    hasLongVowel = true;
+                    break;
+                }
+            }
+
+            if (hasLongVowel) {
+                let isShortened = false;
+                // ตรวจสอบว่าถูกทำให้สั้นลงด้วย ะ หรือ ็ หรือไม่
+                for (let s of shorteners) {
+                    if (processedWord.includes(s)) {
+                        isShortened = true;
+                        break;
+                    }
+                }
+                // ตรวจสอบรูปแบบสระประสมเสียงสั้นที่อาจมีรูปสระยาวประกอบ
+                if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ") || processedWord.includes("เอียะ") || processedWord.includes("เอือะ")) {
+                    isShortened = true;
+                }
+
+                if (!isShortened) {
+                    // มีสระเสียงยาว และไม่ถูกทำให้สั้นลง -> เป็นครุ (เช่น เหตุ, ชาติ, ญาติ)
+                    return false; 
+                }
             }
  
             const shortVowelPatterns = ["อะ", "อิ", "อึ", "อุ", "เอะ", "แอะ", "โอะ", "เอาะ", "เอียะ", "เอือะ", "อัวะ", "เออะ", "ะ", "ิ", "ึ", "ุ", "เ-ะ", "แ-ะ", "โ-ะ", "เ-าะ"];
