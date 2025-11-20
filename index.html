@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.5 (Check Samphus Sam + New Counter)</title>
+  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.6 (Ror-Han Advanced Fix)</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   
   <script src="/_sdk/element_sdk.js"></script>
@@ -318,7 +318,7 @@
             border: 1px solid #f5c6cb;
             color: #721c24;
         }
-
+        
         .samphus-warning {
             background-color: #fff3cd;
             border: 1px solid #ffeeba;
@@ -387,7 +387,7 @@
        .copy-button.copied {
            background: #27ae60;
         }
-        
+
         .reset-button {
            background: #e74c3c;
             color: white;
@@ -722,10 +722,7 @@
         function getInitialConsonantGroup(word) {
             if (!word) return '';
             word = word.trim().replace(/[่้๊๋์]/g, ''); // Remove tones
-            // Remove leading vowels if present (some tricky ones) - But usually initial consonant is the first char of the processed word or after prefix vowels
-            // Simplified approach: Get the first consonant char found
             
-            // Vowels that appear before consonant: เ แ โ ใ ไ
             let startIndex = 0;
             if ("เแโใไ".includes(word.charAt(0))) {
                 startIndex = 1;
@@ -735,7 +732,7 @@
             
             const char = word.charAt(startIndex);
             
-            // Group mappings for sound check (Phonetic approach for matching "ไพ" vs "ภัย")
+            // Group mappings for sound check
             if ('ก'.includes(char)) return 'k';
             if ('ขฃคฅฆ'.includes(char)) return 'kh';
             if ('ง'.includes(char)) return 'ng';
@@ -750,7 +747,6 @@
             if ('บ'.includes(char)) return 'b';
             if ('ป'.includes(char)) return 'p';
             if ('ผพภฟฝ'.includes(char)) {
-                 // Fine-grain: P-H vs F
                  if ('ฝฟ'.includes(char)) return 'f';
                  return 'ph';
             }
@@ -764,12 +760,10 @@
             return char; // Fallback
         }
 
-        // Check for homophones (Same sound but different spelling, or just check if they sound identical)
+        // Check for homophones
         function isHomophone(word1, word2) {
-             // 1. Check if they rhyme (Vowel + Final match)
              if (!checkSamphus(word1, word2)) return false;
              
-             // 2. Check if Initial Consonant Sound matches
              const init1 = getInitialConsonantGroup(word1);
              const init2 = getInitialConsonantGroup(word2);
              
@@ -782,6 +776,41 @@
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
+            // --- START UPDATE: Ror Han Specific Rules ---
+            // 1. Ror Han + Mae Kod (อรรถ, วรรต, กรรษ -> อะ + กด)
+            // ตรวจสอบตัวสะกด: ถ,ต,ษ,ส,ศ,ด,จ,ช,ฎ,ฏ,ฐ,ฑ,ฒ,ท,ธ
+            if (/รร[ถตษสศดจชฎฏฐฑฒทธ]$/.test(processedWord)) {
+                return { vowel: 'อะ', finalGroup: 'กด' };
+            }
+
+            // 2. Ror Han + Mae Kok (อรรค, มรรค -> อะ + กก)
+            // ตรวจสอบตัวสะกด: ค,ก,ข,ฆ
+            if (/รร[คกขฆ]$/.test(processedWord)) {
+                return { vowel: 'อะ', finalGroup: 'กก' };
+            }
+
+            // 3. Ror Han + Mae Kob (สรรพ, บรรพ -> อะ + กบ)
+            // ตรวจสอบตัวสะกด: พ,ภ,บ,ป,ฟ
+            if (/รร[พภบปฟ]$/.test(processedWord)) {
+                return { vowel: 'อะ', finalGroup: 'กบ' };
+            }
+
+            // 4. Ror Han + Mae Kom (กรรม, ธรรม -> อำ) - Keep standard convention
+            if (processedWord.endsWith('รรม')) {
+                return { vowel: 'อำ', finalGroup: 'กกา' }; // ใช้ อำ แทนเพื่อเข้าคู่กับ สระอำ
+            }
+            
+            // 5. Ror Han Open (สรร, บรร -> อะ + กน)
+            if (processedWord.endsWith('รร')) {
+                return { vowel: 'อะ', finalGroup: 'กน' };
+            }
+            
+            // 6. Ror Han + N (พรรณ -> อะ + กน)
+            if (processedWord.endsWith('รรณ')) {
+                return { vowel: 'อะ', finalGroup: 'กน' };
+            }
+            // --- END UPDATE ---
+
             if (hasAiVowel(processedWord)) {
                 return { vowel: 'ไอ', finalGroup: 'เกย' };
             }
@@ -991,10 +1020,7 @@
             
            input.classList.remove('correct', 'incorrect');
             
-            if (!word) {
-                 // Clear empty state style
-                 return;
-            }
+            if (!word) return;
             
             const wordIsLahu = isLahu(word);
             
@@ -1047,8 +1073,8 @@
             if (totalFilled === 0) {
                feedback.textContent = `กรุณากรอกคำในวรรคที่ ${verseNumber}`;
                feedback.style.backgroundColor = '#e8f4f8';
-               feedback.style.color = '#2c3e50';
                feedback.style.borderColor = '#bee5eb';
+               feedback.style.color = '#2c3e50';
             } else if (errors.length === 0 && totalFilled === inputs.length) {
                feedback.textContent = `✅ วรรคที่ ${verseNumber} ถูกต้องทั้งหมด!`;
                feedback.style.backgroundColor = '#d4edda';
@@ -1068,22 +1094,16 @@
         }
  
         function checkAllSamphus() {
-            // ตรวจสอบสัมผัสทั้งหมด 5 จุด (3 จุดภายในบท, 1 จุดระหว่างบท, 1 จุดรับสัมผัสบท 2)
             const samphusConnections = [
-                // บทที่ 1
                 { send: { verse: 1, position: 5 }, receive: { verse: 2, position: 3 }, type: 'internal' },
                 { send: { verse: 2, position: 6 }, receive: { verse: 3, position: 5 }, type: 'internal' },
                 
-                // สัมผัสระหว่างบท (ท้ายบท 1 -> ท้ายวรรค 2 ของบท 2)
                 { send: { verse: 4, position: 6 }, receive: { verse: 6, position: 6 }, type: 'cross' },
 
-                // บทที่ 2
                 { send: { verse: 5, position: 5 }, receive: { verse: 6, position: 3 }, type: 'internal' },
-                // ท้ายวรรค 2 บท 2 (คำที่รับสัมผัสระหว่างบท) ส่งต่อไปยังท้ายวรรค 3 บท 2
                 { send: { verse: 6, position: 6 }, receive: { verse: 7, position: 5 }, type: 'internal' }
             ];
             
-            // ลบ feedback เก่าออกให้หมดก่อน
             document.querySelectorAll('.samphus-feedback').forEach(el => el.remove());
 
             samphusConnections.forEach(connection => {
@@ -1103,31 +1123,23 @@
                        let connectionText = connection.type === 'cross' ? ' (ข้ามบท)' : '';
 
                        if (hasSamphus) {
-                           // Check for "Repeat Rhyme" (Samphus Sam)
-                           // Condition 1: Exact word match
                            const isExactSame = sendWord === receiveWord;
-                           // Condition 2: Homophones (Same sound but different or same word)
                            const isSameSound = isHomophone(sendWord, receiveWord);
                            
                            if (isExactSame || isSameSound) {
-                               // Warning for Samphus Sam
                                sendFeedback.className = 'samphus-feedback samphus-warning';
                                receiveFeedback.className = 'samphus-feedback samphus-warning';
                                
                                const warningMsg = isExactSame ? 'คำซ้ำ' : 'เสียงพ้อง';
                                sendFeedback.textContent = `⚠️ โปรดระวัง "สัมผัสซ้ำ" (${warningMsg}) กับ "${receiveWord}"`;
                                receiveFeedback.textContent = `⚠️ โปรดระวัง "สัมผัสซ้ำ" (${warningMsg}) กับ "${sendWord}"`;
-                               
                            } else {
-                               // Good Rhyme
                                sendFeedback.className = 'samphus-feedback samphus-correct';
                                receiveFeedback.className = 'samphus-feedback samphus-correct';
                                sendFeedback.textContent = `✅ สัมผัสกับ "${receiveWord}"${connectionText}`;
                                receiveFeedback.textContent = `✅ สัมผัสกับ "${sendWord}"${connectionText}`;
                            }
-                           
                        } else {
-                           // No Rhyme
                            sendFeedback.className = 'samphus-feedback samphus-incorrect';
                            receiveFeedback.className = 'samphus-feedback samphus-incorrect';
                            sendFeedback.textContent = `❌ ไม่สัมผัสกับ "${receiveWord}"${connectionText}`;
@@ -1157,7 +1169,6 @@
             let resultHTML = '';
             let hasContent = false;
             
-            // สร้างชุดข้อมูล 2 บท
             const stanzas = [
                 { start: 1, end: 4 },
                 { start: 5, end: 8 }
@@ -1218,7 +1229,6 @@
                    // Verse empty
                 }
                 
-                // เพิ่มบรรทัดว่างระหว่างบท (หลังจบวรรคที่ 4)
                 if (verse === 4 && verses.length > 0) {
                     verses.push(""); 
                 }
@@ -1240,7 +1250,6 @@
                    copyButton.classList.remove('copied');
                 }, 2000);
             }).catch(function(err) {
-                // Fallback
                 const textArea = document.createElement('textarea');
                textArea.value = textToCopy;
                document.body.appendChild(textArea);
@@ -1257,8 +1266,6 @@
                 }, 2000);
             });
         }
-        
-        // --- LocalStorage Functions ---
         
         function saveData() {
             const inputs = document.querySelectorAll('.word-input');
@@ -1283,12 +1290,10 @@
                 const key = `v${input.dataset.verse}_p${input.dataset.position}`;
                 if (data[key]) {
                     input.value = data[key];
-                    // Trigger check logic immediately
                     checkWord(input);
                 }
             });
             
-            // Update result display and samphus after loading all
             updateResult();
             checkAllSamphus();
         }
@@ -1303,7 +1308,6 @@
                     input.classList.remove('correct', 'incorrect', 'samphus-send', 'samphus-receive');
                 });
                 
-                // Reset feedbacks
                 document.querySelectorAll('.verse-feedback').forEach(fb => {
                     fb.textContent = '';
                     fb.style.backgroundColor = '#e8f4f8';
@@ -1311,12 +1315,11 @@
                 });
                 
                 updateResult();
-                checkAllSamphus(); // This will clear samphus feedbacks
+                checkAllSamphus();
             }
         }
  
         document.addEventListener('DOMContentLoaded', function() {
-            // Load data first
             loadData();
             
             const allInputs = document.querySelectorAll('.word-input');
@@ -1325,12 +1328,10 @@
                    checkWord(this);
                    updateResult();
                    checkAllSamphus();
-                   // Auto save on input
                    saveData();
                });
            });
 
-           // Counter API Implementation
            const counterElement = document.getElementById('view-count');
            const namespace = 'indravichien-tool';
            const key = 'visits';
@@ -1346,7 +1347,6 @@
                });
         });
  
-        // Element SDK implementation
         async function onConfigChange(config) {
             const appTitle = config.app_title || defaultConfig.app_title;
            document.getElementById('app-title').textContent = appTitle;
