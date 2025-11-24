@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.8 (Sound & Effects Added)</title>
+  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.9 (Button Moved)</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
@@ -87,7 +87,7 @@
         /* --- STYLES FOR GOLD BUTTON --- */
         .gold-button-container {
             text-align: center;
-            margin: 25px 0;
+            margin: 30px 0 10px 0; /* Adjusted margin */
         }
 
         .gold-btn {
@@ -573,12 +573,6 @@
         </a>
     </div>
    </div>
-
-   <div class="gold-button-container">
-        <a href="https://nonthaphathr.github.io/intharavichian11check/" target="_blank" class="gold-btn">
-            ✨ ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ ที่แต่งเสร็จ คลิก ✨
-        </a>
-   </div>
    
    <div class="samphus-info">
     <h4 style="margin-top: 0; color: #e67e22;">📝 หลักการสัมผัส</h4>
@@ -742,6 +736,12 @@
       กรุณากรอกคำในแต่ละวรรคเพื่อดูผลลัพธ์
      </div>
     </div>
+   </div>
+
+   <div class="gold-button-container">
+        <a href="https://nonthaphathr.github.io/intharavichian11check/" target="_blank" class="gold-btn">
+            ✨ ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ ที่แต่งเสร็จ คลิก ✨
+        </a>
    </div>
    
    <div class="footer-counter">
@@ -1273,11 +1273,11 @@
         function copyToClipboard() {
             const copyButton = document.getElementById('copy-button');
             
-            // --- NEW: Play Sound ---
+            // --- Play Sound ---
             const audio = new Audio('https://nonthaphathr.github.io/uploadimg/copychunt.mp3');
             audio.play().catch(e => console.log("Audio play failed (user interaction needed or blocked):", e));
 
-            // --- NEW: Confetti Effect ---
+            // --- Confetti Effect ---
             confetti({
                 particleCount: 100,
                 spread: 70,
