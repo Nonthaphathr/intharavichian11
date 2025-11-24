@@ -3,8 +3,9 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.7 (Ror-Han & Mai Han-Akat Fix)</title>
+  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.8 (Sound & Effects Added)</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
   <script src="/_sdk/element_sdk.js"></script>
 
@@ -80,8 +81,63 @@
            border-left: 4px solid #3498db;
             padding: 15px;
            border-radius: 8px;
-           margin-bottom: 30px;
+           margin-bottom: 20px;
         }
+
+        /* --- STYLES FOR GOLD BUTTON --- */
+        .gold-button-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .gold-btn {
+            background: linear-gradient(45deg, #FFD700, #FDB931, #FFD700);
+            border: 2px solid #DAA520;
+            color: #5c3a00;
+            font-weight: 700;
+            font-size: 1.1em;
+            text-decoration: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);
+            transition: all 0.3s ease;
+            animation: pulse-gold 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gold-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.6);
+            color: #3d2600;
+        }
+
+        .gold-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            animation: shine 3s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+
+        @keyframes shine {
+            0% { left: -100%; top: -100%; }
+            20% { left: 100%; top: 100%; }
+            100% { left: 100%; top: 100%; }
+        }
+        /* --- END GOLD BUTTON --- */
 
         .stanza-header {
             background-color: #e2e8f0;
@@ -488,6 +544,13 @@
                 flex-direction: column;
                 width: 100%;
             }
+
+            .gold-btn {
+                width: 100%;
+                box-sizing: border-box;
+                font-size: 1em;
+                padding: 12px 15px;
+            }
         }
    </style>
  </head>
@@ -509,6 +572,12 @@
             <img src="https://img5.pic.in.th/file/secure-sv1/logo-vichakarngo-7.png" alt="คลังคำลหุ" style="max-width: 200px; max-height: 80px; width: auto; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         </a>
     </div>
+   </div>
+
+   <div class="gold-button-container">
+        <a href="https://nonthaphathr.github.io/intharavichian11check/" target="_blank" class="gold-btn">
+            ✨ ระบบตรวจทานอินทรวิเชียรฉันท์ ๑๑ ที่แต่งเสร็จ คลิก ✨
+        </a>
    </div>
    
    <div class="samphus-info">
@@ -1203,6 +1272,17 @@
  
         function copyToClipboard() {
             const copyButton = document.getElementById('copy-button');
+            
+            // --- NEW: Play Sound ---
+            const audio = new Audio('https://nonthaphathr.github.io/uploadimg/copychunt.mp3');
+            audio.play().catch(e => console.log("Audio play failed (user interaction needed or blocked):", e));
+
+            // --- NEW: Confetti Effect ---
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
             
             const verses = [];
             for (let verse = 1; verse <= 8; verse++) {
