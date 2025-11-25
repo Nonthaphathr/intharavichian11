@@ -19,7 +19,7 @@
             margin: 0;
             padding: 20px;
            min-height: 100%;
-           padding-bottom: 50px;
+           padding-bottom: 80px; /* เพิ่มพื้นที่ด้านล่างเผื่อปุ่มลอย */
         }
 
         .container {
@@ -522,6 +522,61 @@
             color: #880e4f;
         }
 
+        /* --- STYLES FOR FLOATING FEEDBACK BUTTON --- */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .star-inactive {
+            color: #e2e8f0;
+            cursor: pointer;
+        }
+
+        .star-active {
+            color: #fbbf24;
+            cursor: pointer;
+        }
+        
+        /* Custom Keyframe for Modal */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 40px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+
         @media (max-width: 768px) {
             .container {
                margin: 10px;
@@ -557,6 +612,13 @@
                 box-sizing: border-box;
                 font-size: 1em;
                 padding: 12px 15px;
+            }
+            
+            .floating-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 18px;
+                font-size: 14px;
             }
         }
    </style>
@@ -761,6 +823,61 @@
    </div>
    
   </div>
+
+  <button onclick="openModal()" class="floating-btn group">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+    </svg>
+    <span class="font-semibold">เสนอแนะ</span>
+  </button>
+
+  <div id="feedbackModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 min-h-screen">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-100 p-6 animate-fade-in-up relative">
+            
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">ความพึงพอใจ</h3>
+                <p class="text-gray-500 text-sm">โปรดให้คะแนนและข้อเสนอแนะเพื่อการพัฒนา</p>
+            </div>
+
+            <div class="flex justify-center gap-2 mb-6">
+                <svg onclick="rate(1)" class="w-10 h-10 star-icon star-inactive" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg onclick="rate(2)" class="w-10 h-10 star-icon star-inactive" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg onclick="rate(3)" class="w-10 h-10 star-icon star-inactive" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg onclick="rate(4)" class="w-10 h-10 star-icon star-inactive" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg onclick="rate(5)" class="w-10 h-10 star-icon star-inactive" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="suggestion">
+                    ข้อเสนอแนะ (สั้นๆ)
+                </label>
+                <textarea id="suggestion" rows="2" class="shadow-inner appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" placeholder="เช่น อยากให้เพิ่มฉันท์..."></textarea>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="author">
+                    ข้อมูลผู้ตอบ (ไม่บังคับ)
+                </label>
+                <input type="text" id="author" class="shadow-inner appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" placeholder="ชื่อ หรือ ช่องทางติดต่อ (ถ้ามี)">
+            </div>
+
+            <div class="flex gap-4 mb-4">
+                <button onclick="closeModal()" class="flex-1 py-2 px-4 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 transition">ปิด</button>
+                <button onclick="submitFeedback()" id="submitBtn" class="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold hover:shadow-lg transition transform active:scale-95">บันทึก</button>
+            </div>
+
+            <div class="text-center pt-4 border-t border-gray-100">
+                 <p class="text-blue-900 font-semibold text-sm leading-relaxed">
+                    ช่วยสนับสนุนค่ากาแฟครูนนทพัทธ์<br>
+                    <span class="font-bold">ธนาคารกรุงไทย เลขที่บัญชี : 343-0-37750-1</span>
+                 </p>
+            </div>
+        </div>
+    </div>
+  </div>
+
   <script>
         // Default configuration
         const defaultConfig = {
@@ -905,7 +1022,7 @@
             
             for (let specialWord of specialAiWords) {
                 if (word === specialWord || word.endsWith(specialWord)) {
-                      return true;
+                       return true;
                 }
             }
             return false;
@@ -1050,7 +1167,8 @@
                 return false; 
             }
 
-            const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
+            // *** แก้ไข: เอา "อ" ออกจากรายการนี้ เพื่อให้คำที่มี "อ" เป็นเสียงสั้นได้ถูกต้อง ***
+            const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ"];
             const shorteners = ["ะ", "็"]; 
 
             let hasLongVowel = false;
@@ -1486,6 +1604,82 @@
 
                 updateResult();
                 checkAllSamphus();
+            }
+        }
+        
+        // --- Feedback Logic ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrno1FOPX_pRd7ZjWM1mx3v5Z_OP8IKa19QR9Wgg7qmpyhmZe8NY-DlX9QF6NvafcX/exec"; 
+        let currentRating = 0;
+
+        function openModal() {
+            document.getElementById('feedbackModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').classList.add('hidden');
+            resetForm();
+        }
+
+        function rate(n) {
+            currentRating = n;
+            const stars = document.querySelectorAll('.star-icon');
+            stars.forEach((star, index) => {
+                if (index < n) {
+                    star.classList.remove('star-inactive');
+                    star.classList.add('star-active');
+                } else {
+                    star.classList.remove('star-active');
+                    star.classList.add('star-inactive');
+                }
+            });
+        }
+
+        function resetForm() {
+            currentRating = 0;
+            document.getElementById('suggestion').value = '';
+            document.getElementById('author').value = ''; 
+            rate(0);
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = 'บันทึก';
+            btn.disabled = false;
+        }
+
+        async function submitFeedback() {
+            if (currentRating === 0) {
+                alert('กรุณาให้คะแนนความพึงพอใจก่อนบันทึก');
+                return;
+            }
+
+            const comment = document.getElementById('suggestion').value;
+            const author = document.getElementById('author').value; 
+            const btn = document.getElementById('submitBtn');
+            
+            // Loading State
+            btn.innerText = 'กำลังบันทึก...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rating: currentRating,
+                        comment: comment,
+                        author: author 
+                    })
+                });
+
+                alert('บันทึกข้อมูลเรียบร้อยแล้ว ขอบคุณสำหรับคำแนะนำครับ!');
+                closeModal();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาดในการบันทึก โปรดลองใหม่อีกครั้ง');
+                btn.innerText = 'บันทึก';
+                btn.disabled = false;
             }
         }
  
