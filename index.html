@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.1.9 (Button Moved)</title>
+  <title>เครื่องมือตรวจอินทรวิเชียรฉันท์ 11 V.2.0</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
@@ -87,7 +87,7 @@
         /* --- STYLES FOR GOLD BUTTON --- */
         .gold-button-container {
             text-align: center;
-            margin: 30px 0 10px 0; /* Adjusted margin */
+            margin: 30px 0 10px 0;
         }
 
         .gold-btn {
@@ -514,6 +514,13 @@
             color: #2c3e50;
             font-size: 16px;
         }
+        
+        /* เพิ่ม style สำหรับเตือนสระซ้ำ */
+        .vowel-overuse-feedback {
+            background-color: #fce4ec;
+            border: 1px solid #f8bbd9;
+            color: #880e4f;
+        }
 
         @media (max-width: 768px) {
             .container {
@@ -783,7 +790,7 @@
         // Function to get Initial Consonant Sound Group (Checking Homophones)
         function getInitialConsonantGroup(word) {
             if (!word) return '';
-            word = word.trim().replace(/[่้๊๋์]/g, ''); // Remove tones
+            word = word.trim().replace(/[่้๊๋์]/g, '');
             
             let startIndex = 0;
             if ("เแโใไ".includes(word.charAt(0))) {
@@ -794,7 +801,6 @@
             
             const char = word.charAt(startIndex);
             
-            // Group mappings for sound check
             if ('ก'.includes(char)) return 'k';
             if ('ขฃคฅฆ'.includes(char)) return 'kh';
             if ('ง'.includes(char)) return 'ng';
@@ -819,7 +825,7 @@
             if ('หฮ'.includes(char)) return 'h';
             if ('อ'.includes(char)) return 'a';
             
-            return char; // Fallback
+            return char;
         }
 
         // Check for homophones
@@ -838,40 +844,25 @@
             const cleanWord = word.replace(/[่้๊๋์]/g, '');
             const processedWord = processLeadingConsonants(cleanWord);
             
-            // --- START UPDATE: Ror Han Specific Rules ---
-            // 1. Ror Han + Mae Kod (อรรถ, วรรต, กรรษ -> อะ + กด)
-            // ตรวจสอบตัวสะกด: ถ,ต,ษ,ส,ศ,ด,จ,ช,ฎ,ฏ,ฐ,ฑ,ฒ,ท,ธ
+            // --- Ror Han Specific Rules ---
             if (/รร[ถตษสศดจชฎฏฐฑฒทธ]$/.test(processedWord)) {
                 return { vowel: 'อะ', finalGroup: 'กด' };
             }
-
-            // 2. Ror Han + Mae Kok (อรรค, มรรค -> อะ + กก)
-            // ตรวจสอบตัวสะกด: ค,ก,ข,ฆ
             if (/รร[คกขฆ]$/.test(processedWord)) {
                 return { vowel: 'อะ', finalGroup: 'กก' };
             }
-
-            // 3. Ror Han + Mae Kob (สรรพ, บรรพ -> อะ + กบ)
-            // ตรวจสอบตัวสะกด: พ,ภ,บ,ป,ฟ
             if (/รร[พภบปฟ]$/.test(processedWord)) {
                 return { vowel: 'อะ', finalGroup: 'กบ' };
             }
-
-            // 4. Ror Han + Mae Kom (กรรม, ธรรม -> อำ) - Keep standard convention
             if (processedWord.endsWith('รรม')) {
-                return { vowel: 'อำ', finalGroup: 'กกา' }; // ใช้ อำ แทนเพื่อเข้าคู่กับ สระอำ
+                return { vowel: 'อำ', finalGroup: 'กกา' };
             }
-            
-            // 5. Ror Han Open (สรร, บรร -> อะ + กน)
             if (processedWord.endsWith('รร')) {
                 return { vowel: 'อะ', finalGroup: 'กน' };
             }
-            
-            // 6. Ror Han + N (พรรณ -> อะ + กน)
             if (processedWord.endsWith('รรณ')) {
                 return { vowel: 'อะ', finalGroup: 'กน' };
             }
-            // --- END UPDATE ---
             
             if (hasAiVowel(processedWord)) {
                 return { vowel: 'ไอ', finalGroup: 'เกย' };
@@ -981,7 +972,6 @@
             if (word.includes('อิ')) return 'อิ';
             if (word.includes('อะ') || word.includes('ะ')) return 'อะ';
             
-            // FIX: Add Mai Han-Akat check here
             if (word.includes('ั')) return 'อะ';
             
             if (word.length === 1 || (word.length === 2 && "่้๊๋์".includes(word.charAt(1)))) {
@@ -989,6 +979,50 @@
             }
             
             return word.charAt(word.length - 1);
+        }
+        
+        // ========== NEW FUNCTION: ตรวจจับคำที่มีพยัญชนะซ้อน/ตัวสะกดซ่อน ==========
+        // คำอย่าง สิทธิ, สุทธิ, มุตติ, มุติ, สิทธิ์ ควรเป็นครุ
+        function hasHiddenEndingConsonant(word) {
+            const cleanWord = word.replace(/[่้๊๋์]/g, '');
+            
+            // ตรวจสอบว่าลงท้ายด้วยสระอิ หรือ สระอุ
+            if (!cleanWord.endsWith('ิ') && !cleanWord.endsWith('ุ')) {
+                return false;
+            }
+            
+            // คำสั้นเกินไป (เช่น "ติ", "ทุ")
+            if (cleanWord.length < 3) return false;
+            
+            // หาส่วนก่อนสระสุดท้าย
+            const beforeLastVowel = cleanWord.substring(0, cleanWord.length - 1);
+            
+            // นับพยัญชนะที่ติดกันก่อนสระสุดท้าย
+            const consonants = 'กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ';
+            let consonantCount = 0;
+            let pos = beforeLastVowel.length - 1;
+            
+            while (pos >= 0 && consonants.includes(beforeLastVowel[pos])) {
+                consonantCount++;
+                pos--;
+            }
+            
+            // ถ้ามีพยัญชนะ 2 ตัวขึ้นไปก่อนสระสุดท้าย -> มีตัวสะกด (ครุ)
+            // เช่น สิทธิ (ทธ), มุตติ (ตต)
+            if (consonantCount >= 2) {
+                return true;
+            }
+            
+            // ถ้ามีพยัญชนะ 1 ตัว และก่อนหน้านั้นมีสระ -> มีตัวสะกด (ครุ)
+            // เช่น มุติ (ม-ุ-ต-ิ) -> ต เป็นตัวสะกด
+            if (consonantCount === 1 && pos >= 0) {
+                const vowels = 'ะัาำิีึืุูเแโใไๅ';
+                if (vowels.includes(beforeLastVowel[pos])) {
+                    return true;
+                }
+            }
+            
+            return false;
         }
  
         function isLahu(word) {
@@ -1004,6 +1038,12 @@
  
             if (processedWord.includes("อำ") || processedWord.includes("ไอ") || processedWord.includes("ใอ") || processedWord.includes("เอา")) {
                 return false;
+            }
+            
+            // ========== เพิ่มการตรวจจับคำบาลี/สันสกฤตที่มีพยัญชนะซ้อน ==========
+            // คำเช่น สิทธิ, สุทธิ, มุตติ, มุติ, สิทธิ์ เป็นครุ (ไม่ใช่ลหุ)
+            if (hasHiddenEndingConsonant(processedWord)) {
+                return false; // เป็นครุ
             }
  
             if (hasEndingConsonant(word)) {
@@ -1224,6 +1264,65 @@
                    }
                 }
             });
+            
+            // ========== เรียกฟังก์ชันตรวจสระซ้ำ ==========
+            checkVowelOveruse();
+        }
+        
+        // ========== NEW FUNCTION: ตรวจสอบสัมผัสสระเสียงเดียวกันมากไป ==========
+        function checkVowelOveruse() {
+            // ลบ feedback เก่าทั้งหมด
+            document.querySelectorAll('.vowel-overuse-feedback').forEach(el => el.remove());
+            
+            // บทที่ 1: วรรค 2 ท้าย (v2p6), วรรค 3 ท้าย (v3p5), วรรค 4 ท้าย (v4p6)
+            checkVowelOveruseForStanza([
+                { verse: 2, position: 6 },
+                { verse: 3, position: 5 },
+                { verse: 4, position: 6 }
+            ], 1);
+            
+            // บทที่ 2: วรรค 6 ท้าย (v6p6), วรรค 7 ท้าย (v7p5), วรรค 8 ท้าย (v8p6)
+            checkVowelOveruseForStanza([
+                { verse: 6, position: 6 },
+                { verse: 7, position: 5 },
+                { verse: 8, position: 6 }
+            ], 2);
+        }
+        
+        function checkVowelOveruseForStanza(positions, stanzaNum) {
+            const words = [];
+            const inputs = [];
+            
+            for (let pos of positions) {
+                const input = document.querySelector(`[data-verse="${pos.verse}"][data-position="${pos.position}"]`);
+                if (input && input.value.trim()) {
+                    words.push(input.value.trim());
+                    inputs.push(input);
+                } else {
+                    words.push(null);
+                    inputs.push(null);
+                }
+            }
+            
+            // ถ้ามีครบ 3 คำ
+            if (words[0] && words[1] && words[2]) {
+                // ดึงเฉพาะสระ (ไม่รวมตัวสะกด)
+                const vowel1 = getVowelSound(words[0]);
+                const vowel2 = getVowelSound(words[1]);
+                const vowel3 = getVowelSound(words[2]);
+                
+                // ตรวจว่าสระของคำท้ายวรรค 4 เหมือนกับทั้งคำท้ายวรรค 2 และวรรค 3
+                if (vowel3 === vowel1 && vowel3 === vowel2 && vowel3 !== '') {
+                    const feedback = document.createElement('div');
+                    feedback.className = 'samphus-feedback vowel-overuse-feedback';
+                    feedback.textContent = `⚠️ สระท้ายวรรคเสียงเดียวกันมากไป (${vowel3}) กับวรรคก่อนหน้า`;
+                    
+                    // แสดงที่คำท้ายวรรค 4 (ตำแหน่งที่ 3 ใน array)
+                    if (inputs[2]) {
+                        inputs[2].parentElement.appendChild(feedback);
+                    }
+                }
+            }
         }
  
         function updateResult() {
@@ -1273,11 +1372,9 @@
         function copyToClipboard() {
             const copyButton = document.getElementById('copy-button');
             
-            // --- Play Sound ---
             const audio = new Audio('https://nonthaphathr.github.io/uploadimg/copychunt.mp3');
-            audio.play().catch(e => console.log("Audio play failed (user interaction needed or blocked):", e));
+            audio.play().catch(e => console.log("Audio play failed:", e));
 
-            // --- Confetti Effect ---
             confetti({
                 particleCount: 100,
                 spread: 70,
@@ -1298,8 +1395,6 @@
                 
                 if (words.length > 0) {
                     verses.push(words.join(''));
-                } else if (verse <= 8) {
-                   // Verse empty
                 }
                 
                 if (verse === 4 && verses.length > 0) {
@@ -1395,7 +1490,6 @@
         }
  
         document.addEventListener('DOMContentLoaded', function() {
-            // Load data first
             loadData();
             
             const allInputs = document.querySelectorAll('.word-input');
@@ -1408,7 +1502,6 @@
                });
            });
 
-           // Counter API Implementation
            const counterElement = document.getElementById('view-count');
            const namespace = 'indravichien-tool';
            const key = 'visits';
